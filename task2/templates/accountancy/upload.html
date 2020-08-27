@@ -1,0 +1,10 @@
+{% extends 'base.html' %}
+{% block title %}Загрузка данных из exel файла в субд {% endblock %}
+{% block content %}
+    <form enctype="multipart/form-data" method="post" class="btn">
+    {% csrf_token %}
+    {{ form }}
+    <input type="submit" value="Загрузить" class="btn" />
+    <a href="{% url 'accountancy:index' %}" class="glo">Вернуться на главную</a>
+</form>
+{% endblock %}

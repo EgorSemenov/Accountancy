@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+{% block title %}Список загруженных файлов{% endblock %}
+{% block content %}
+    <h1 data-name="Загруженные файлы:">Загруженные файлы:</h1>
+    {%  if names_of_files %}
+        {% for i in names_of_files %}
+            <p><a href="{% url 'accountancy:presentation' i.id %} " class="glo">{{i.name}} </a></p>
+        {%  endfor %}
+    <hr>
+    {% else %}
+        <h1 data-name="Ни одного файла не загружено.">Ни одного файла не загружено.</h1>
+    {% endif %}
+    <a href="{% url 'accountancy:upload' %}" class="glo">Загрузить новый</a>
+    <a href="{% url 'accountancy:index' %}" class="glo">Вернуться на главную</a>
+{% endblock %}

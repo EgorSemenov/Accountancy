@@ -1,0 +1,7 @@
+{% extends 'base.html' %}
+{% block title %}Главная страница {% endblock %}
+{% block content %}
+    <h1 data-name="Выберите действие::">Выберите действие:</h1>
+    <a href="{% url 'accountancy:list' %}" class="glo">Список загруженных файлов</a>
+    <a href="{% url 'accountancy:upload'%}" class="glo">Загрузить файл</a>
+{% endblock %}

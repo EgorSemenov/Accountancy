@@ -1,0 +1,44 @@
+{% extends 'base.html' %}
+{% load static %}
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+{#    <link rel="stylesheet" href="{% static 'css/presentation.css' %}"/>#}
+{#    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@100;300;400;500;700;900&display=swap" rel="stylesheet">#}
+{% block title %}
+    {{ name }}
+{% endblock %}
+{% block content %}
+    <table cellspacing="0">
+        <tr>
+            <td rowspan="2" class="border-bold bold" >Б/сч</td>
+            <td colspan="2" class="border-bold bold">ВХОДЯЩЕЕ САЛЬДО</td>
+            <td colspan="2" class="border-bold bold">ОБОРОТЫ</td>
+            <td colspan="2" class="border-bold bold">ИСХОДЯЩЕЕ САЛЬДО</td>
+        </tr>
+        <tr>
+            <td class="border-bold bold">Актив</td>
+            <td class="border-bold bold">Пассив</td>
+            <td class="border-bold bold">Дебет</td>
+            <td class="border-bold bold">Кредит</td>
+            <td class="border-bold bold">Актив</td>
+            <td class="border-bold bold">Пассив</td>
+        </tr>
+        {% for i in data %}
+        <tr>
+        {% if i|length_is:"7" %}
+            {% if i|first < 100 or i|first == 'ПО КЛАССУ' or i|first == 'БАЛАНС' %}
+                {% for j in i %}
+                <td class="right bold">{{j}}</td>
+                {% endfor %}
+            {% else %}
+                {% for j in i %}
+                <td class="right">{{j}}</td>
+                {% endfor %}
+            {% endif %}
+        {% else %}
+            <td colspan="7" class="bold ">{{i|first}}</td>
+        {% endif %}
+        </tr>
+    {% endfor %}
+    </table>
+{% endblock %}
