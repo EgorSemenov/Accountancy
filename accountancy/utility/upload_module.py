@@ -1,15 +1,11 @@
-import os
-
 from accountancy.models import File, Class, Group, Note
-import openpyxl
 from openpyxl import load_workbook
 
 import xlrd
 from openpyxl.workbook import Workbook
-from accountancy.utility.export_module import export_file
 
 
-def cvt_xls_to_xlsx(src_file_path, dst_file_path):
+def cvt_xls_to_xlsx(src_file_path, dst_file_path):  # переделывает xls файлы в xlsx файлы
     book_xls = xlrd.open_workbook(src_file_path)
     book_xlsx = Workbook()
 
@@ -28,9 +24,9 @@ def cvt_xls_to_xlsx(src_file_path, dst_file_path):
     book_xlsx.save(dst_file_path)
 
 
-def parse_class(file_id, i_row, ws):
+def parse_class(file_id, i_row, ws):  # проходясь по exel файлу разбирает его, извлекая информацию о классах\
+    # (строчки начинаются со слов "по классу")\ и вызывая функции по разбору остальных строк.
     class_id = get_num_fr_str(ws['A' + str(i_row)].value)
-    # print(class_id, ws['A' + str(i_row)].value)
     import_class(class_id, ws['A' + str(i_row)].value)
     i_row += 1
     ind = True
@@ -53,38 +49,39 @@ def parse_class(file_id, i_row, ws):
         return temp
 
 
-def import_class(class_id, value):
+def import_class(class_id, value):  # записывает информацию о классе в бд
     Class(class_id, value).save()
 
 
-def parse_group(i_row, ws):
-    # print(int(cell_val('A', i_row, ws)[0:2]))
+def parse_group(i_row, ws):  # разбирает строчку с группой(строчка которая начинается с двузначного числа)
     import_group(int(cell_val('A', i_row, ws)[0:2]))
 
 
-def import_group(code):
+def import_group(code):  # записывает информацию о группе в бд
     Group(Group.objects.count() + 1, code).save()
 
 
-def parse_note(file_id, class_id, i_row, ws):
-    # print(class_id, int(cell_val('A', i_row, ws)[0:2]), int(cell_val('A', i_row, ws)[2:4]), get_row(i_row, ws))
+def parse_note(file_id, class_id, i_row,
+               ws):  # разбирает строчку с записью(строчка которая начинается с четырехзначного числа)
     import_note(file_id, class_id, Group.objects.count(), int(cell_val('A', i_row, ws)[2:4]), get_row(i_row, ws))
 
 
-def import_note(file_id, class_id, group_id, note_code, values):
+def import_note(file_id, class_id, group_id, note_code, values):  # записывает информацию о записи в бд
     Note(Note.objects.count() + 1, note_code, values[0], values[1], values[2], values[3], file_id,
          class_id, group_id).save()
 
 
-def get_row(i_row, ws):
+def get_row(i_row,
+            ws):  # достает часть строки, значения в которой всегда совпадают по типу (с плав. точкой), под строкой\
+    # понимается массив значений ячеек, находящихся в одной строке
     row = []
     for i in 'BCDE':
         row.append(float(cell_val(i, i_row, ws)))
     return row
 
 
-def get_num_fr_str(str):
-    word_list = str.split()
+def get_num_fr_str(s):  # достает число из строки, нужен, чтобы достать номер класса
+    word_list = s.split()
     for word in word_list:
         if word.isnumeric():
             num = int(word)
@@ -92,20 +89,11 @@ def get_num_fr_str(str):
     return num
 
 
-def cell_val(letter, number, ws):
+def cell_val(letter, number, ws):  # достает значение из exel ячейки
     return ws[letter + str(number)].value
 
 
-def import_file(name):
-    if File.objects.filter(name=name).count() == 0:
-        file_id = File.objects.count() + 1
-        File(file_id, name).save()
-        return file_id
-    else:
-        return 0
-
-
-def parse_file_bd(f, path, name):
+def parse_file_bd(f, path, name):  # основной метод вызывающий остальные функции, и доходящий внутри файла до места, с которого нужно начинать парсинг
     file_id = import_file(name)
     if file_id == 0:
         return -1
@@ -123,4 +111,13 @@ def parse_file_bd(f, path, name):
         final_row = parse_class(file_id, i_row, ws)
         print('Парсинг и загрузка в бд завершена, в файле было ', final_row, 'строк.')
         # export_file(1)
+        return 0
+
+
+def import_file(name):  # записывает данные о файле в бд или возвращает -1 в обработчик, если файл с таким именем уже есть
+    if File.objects.filter(name=name).count() == 0:
+        file_id = File.objects.count() + 1
+        File(file_id, name).save()
+        return file_id
+    else:
         return 0

@@ -15,7 +15,7 @@ def index(request):
     return render(request, 'accountancy/welcome_page.html')
 
 
-class upload(CreateView):
+class upload(CreateView):  # класс, который формирует html темплейт в ответ на запрос по соответствующему url
     model = File
     template_name = 'accountancy/upload.html'
     form_class = FileUploadForm
@@ -29,7 +29,7 @@ class upload(CreateView):
             name = request.FILES['file'].name
             if form.is_valid():
                 if handle_uploaded_file(request.FILES['file'], request.FILES['file'].temporary_file_path(),
-                                        name) == -1:
+                                        name) == -1:  # если файл с таким именем уже был, то переходим на соответствующий шаблон
                     return HttpResponseRedirect('exist')
                 else:
                     return HttpResponseRedirect('success')
@@ -46,7 +46,8 @@ def list(request):
 def presentation_file(request, file_id):
     name = File.objects.get(id=file_id).name
     export_list = export_file(file_id)
-    return render(request, 'accountancy/presentation.html', {'data': export_list, 'name': name})
+    return render(request, 'accountancy/presentation.html',
+                  {'data': export_list, 'name': name})  # передается список уже загруженных файлов в соответствующий шаблон.
 
 
 def success(request):
