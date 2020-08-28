@@ -1,7 +1,7 @@
-Python 3.7
-Django 3.1
-openpyxl 3.0.5
-xlrd 1.2.0
+Python==3.7
+Django==3.1
+openpyxl==3.0.5
+xlrd==1.2.0
 asgiref==3.2.10
 cycler==0.10.0
 networkx==2.4
