@@ -1,11 +1,14 @@
 from accountancy.models import File, Class, Group, Note
 from openpyxl import load_workbook
-
+from accountancy.constants import FileLabels
 import xlrd
 from openpyxl.workbook import Workbook
 
 
-def cvt_xls_to_xlsx(src_file_path, dst_file_path):  # переделывает xls файлы в xlsx файлы
+def convert_xls_to_xlsx(src_file_path, dst_file_path):
+    """
+    переделывает xls файлы в xlsx файлы
+    """
     book_xls = xlrd.open_workbook(src_file_path)
     book_xlsx = Workbook()
 
@@ -24,13 +27,18 @@ def cvt_xls_to_xlsx(src_file_path, dst_file_path):  # переделывает x
     book_xlsx.save(dst_file_path)
 
 
-def parse_class(file_id, i_row, ws):  # проходясь по exel файлу разбирает его, извлекая информацию о классах\
-    # (строчки начинаются со слов "по классу")\ и вызывая функции по разбору остальных строк.
+def parse_class(file_id, i_row, ws):
+    """
+    проходясь по exel файлу разбирает его, извлекая информацию о классах(строчки начинаются со слов "по классу")
+     и вызывая функции по разбору остальных видов строк.
+    :param i_row: строка с которой начинается проход
+    :param ws: активная страница exel файла
+    """
     class_id = get_num_fr_str(ws['A' + str(i_row)].value)
     import_class(class_id, ws['A' + str(i_row)].value)
     i_row += 1
     ind = True
-    while not str(ws['A' + str(i_row)].value).startswith('ПО КЛАССУ'):
+    while not str(ws['A' + str(i_row)].value).startswith(FileLabels.ABOUT_CLASS):
         if int(ws['A' + str(i_row)].value) < 100:
             ind = True
             i_row += 1
@@ -49,38 +57,48 @@ def parse_class(file_id, i_row, ws):  # проходясь по exel файлу 
         return temp
 
 
-def import_class(class_id, value):  # записывает информацию о классе в бд
+def import_class(class_id, value):
     Class(class_id, value).save()
 
 
-def parse_group(i_row, ws):  # разбирает строчку с группой(строчка которая начинается с двузначного числа)
+def parse_group(i_row, ws):
+    """
+    разбирает строчку с группой(строчка которая начинается с двузначного числа)
+    """
     import_group(int(cell_val('A', i_row, ws)[0:2]))
 
 
-def import_group(code):  # записывает информацию о группе в бд
+def import_group(code):
     Group(Group.objects.count() + 1, code).save()
 
 
-def parse_note(file_id, class_id, i_row,
-               ws):  # разбирает строчку с записью(строчка которая начинается с четырехзначного числа)
+def parse_note(file_id, class_id, i_row, ws):
+    """
+     разбирает строчку с записью(строчка которая начинается с четырехзначного числа)
+    """
     import_note(file_id, class_id, Group.objects.count(), int(cell_val('A', i_row, ws)[2:4]), get_row(i_row, ws))
 
 
-def import_note(file_id, class_id, group_id, note_code, values):  # записывает информацию о записи в бд
+def import_note(file_id, class_id, group_id, note_code, values):
     Note(Note.objects.count() + 1, note_code, values[0], values[1], values[2], values[3], file_id,
          class_id, group_id).save()
 
 
-def get_row(i_row,
-            ws):  # достает часть строки, значения в которой всегда совпадают по типу (с плав. точкой), под строкой\
-    # понимается массив значений ячеек, находящихся в одной строке
+def get_row(i_row, ws):
+    """
+    достает часть строки, значения в которой всегда совпадают по типу (с плав. точкой), под строкой
+    понимается массив значений ячеек, находящихся в одной строке
+    """
     row = []
     for i in 'BCDE':
         row.append(float(cell_val(i, i_row, ws)))
     return row
 
 
-def get_num_fr_str(s):  # достает число из строки, нужен, чтобы достать номер класса
+def get_num_fr_str(s):
+    """
+    достает число из строки, нужен, чтобы достать номер класса
+    """
     word_list = s.split()
     for word in word_list:
         if word.isnumeric():
@@ -89,17 +107,23 @@ def get_num_fr_str(s):  # достает число из строки, нуже�
     return num
 
 
-def cell_val(letter, number, ws):  # достает значение из exel ячейки
+def cell_val(letter, number, ws):
+    """
+    достает значение из exel ячейки
+    """
     return ws[letter + str(number)].value
 
 
-def parse_file_bd(f, path, name):  # основной метод вызывающий остальные функции, и доходящий внутри файла до места, с которого нужно начинать парсинг
+def parse_file_bd(f, path, name):
+    """
+    основной метод вызывающий остальные функции, и доходящий внутри файла до места, с которого нужно начинать парсинг
+    """
     file_id = import_file(name)
     if file_id == 0:
         return -1
     else:
         if 'xls' in name:
-            cvt_xls_to_xlsx(path, path + 'x')
+            convert_xls_to_xlsx(path, path + 'x')
             path = path + 'x'
         wb = load_workbook(path)
         ws = wb.active
@@ -114,7 +138,10 @@ def parse_file_bd(f, path, name):  # основной метод вызываю�
         return 0
 
 
-def import_file(name):  # записывает данные о файле в бд или возвращает -1 в обработчик, если файл с таким именем уже есть
+def import_file(name):
+    """
+    записывает данные о файле в бд или возвращает -1 в обработчик, если файл с таким именем уже есть
+    """
     if File.objects.filter(name=name).count() == 0:
         file_id = File.objects.count() + 1
         File(file_id, name).save()

@@ -6,7 +6,7 @@ app_name = 'accountancy'
 
 urlpatterns = [
     path('', views.index, name='index'),
-    path('upload', views.upload.as_view(), name='upload'),
+    path('upload', views.Upload.as_view(), name='upload'),
     path('list', views.list, name='list'),
     path('list/<int:file_id>/', views.presentation_file, name='presentation'),  # через этот путь передается id файла, который следует отобразить
     path('exist', views.exist, name='exist'),

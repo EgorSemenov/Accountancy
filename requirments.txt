@@ -1,0 +1,15 @@
+Python 3.7
+Django 3.1
+openpyxl 3.0.5
+xlrd 1.2.0
+asgiref==3.2.10
+cycler==0.10.0
+networkx==2.4
+Pillow==7.1.1
+pyparsing==2.4.7
+python-dateutil==2.8.1
+pytz==2020.1
+PyWavelets==1.1.1
+scipy==1.4.1
+six==1.14.0
+sqlparse==0.3.1

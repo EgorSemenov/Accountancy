@@ -1,6 +1,6 @@
 from django.shortcuts import render
 from django.shortcuts import reverse
-from accountancy.controllers.handlers import handle_uploaded_file
+from accountancy.utility.upload_module import parse_file_bd
 from accountancy.forms import FileUploadForm
 from accountancy.models import File
 from django.views.generic import CreateView
@@ -15,7 +15,7 @@ def index(request):
     return render(request, 'accountancy/welcome_page.html')
 
 
-class upload(CreateView):  # класс, который формирует html темплейт в ответ на запрос по соответствующему url
+class Upload(CreateView):
     model = File
     template_name = 'accountancy/upload.html'
     form_class = FileUploadForm
@@ -24,17 +24,18 @@ class upload(CreateView):  # класс, который формирует html 
         return reverse('success')
 
     def post(self, request, *args, **kwargs):
-        if request.method == 'POST':
-            form = FileUploadForm(request.POST, request.FILES)
-            name = request.FILES['file'].name
-            if form.is_valid():
-                if handle_uploaded_file(request.FILES['file'], request.FILES['file'].temporary_file_path(),
-                                        name) == -1:  # если файл с таким именем уже был, то переходим на соответствующий шаблон
-                    return HttpResponseRedirect('exist')
-                else:
-                    return HttpResponseRedirect('success')
-        else:
-            form = FileUploadForm()
+        form = FileUploadForm(request.POST, request.FILES)
+        name = request.FILES['file'].name
+        if form.is_valid():
+            if parse_file_bd(request.FILES['file'], request.FILES['file'].temporary_file_path(),
+                             name) == -1:  # если файл с таким именем уже был, то переходим на соответствующий шаблон
+                return HttpResponseRedirect('exist')
+            else:
+                return HttpResponseRedirect('success')
+        return render(request, 'accountancy/upload.html', {'form': form})
+
+    def get(self, request, *args, **kwargs):
+        form = FileUploadForm()
         return render(request, 'accountancy/upload.html', {'form': form})
 
 
@@ -47,7 +48,8 @@ def presentation_file(request, file_id):
     name = File.objects.get(id=file_id).name
     export_list = export_file(file_id)
     return render(request, 'accountancy/presentation.html',
-                  {'data': export_list, 'name': name})  # передается список уже загруженных файлов в соответствующий шаблон.
+                  {'data': export_list,
+                   'name': name})  # передается список уже загруженных файлов в соответствующий шаблон.
 
 
 def success(request):
