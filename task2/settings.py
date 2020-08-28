@@ -79,8 +79,8 @@ WSGI_APPLICATION = 'task2.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'ey_accountancy',
-        'USER': 'admin',
+        'NAME': 'name',
+        'USER': 'user',
         'PASSWORD': '<>',
         'HOST': 'localhost',
         'PORT': '5432',

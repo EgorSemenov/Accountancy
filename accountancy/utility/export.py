@@ -16,15 +16,15 @@ def export_file(f_id):
         temp_list = [Class.objects.get(id=c).name]
         export_list.append(temp_list)
         for g in groups:
-            q = q_append_outcoming_fields(q_filter(f_id))
-            for i in q_values(q):  # removed list
+            q = q_append_outcoming_fields(q_filter(f_id, c, g))
+            for i in q_values(q):
                 i = list(i)
                 i[0] = format_code(i, q)
                 export_list.append(i)  # добавляем строку с 4-ёх значным числом
             l = list(q_sum(q))
             l.insert(0, q[0].group_id.code)
             export_list.append(l)  # добавляем строку с двузначным числом (по группе)
-        q = q_append_outcoming_fields(q_filter(f_id))
+        q = q_append_outcoming_fields(q_filter(f_id,c))
         l = list(q_sum(q))
         l.insert(0, FileLabels.ABOUT_CLASS)  # добавляем строку с "ПО КЛАССУ"
         export_list.append(l)

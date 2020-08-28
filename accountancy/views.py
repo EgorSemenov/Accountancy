@@ -1,11 +1,11 @@
 from django.shortcuts import render
 from django.shortcuts import reverse
-from accountancy.utility.upload_module import parse_file_bd
+from accountancy.utility.upload import parse_file_bd
 from accountancy.forms import FileUploadForm
 from accountancy.models import File
 from django.views.generic import CreateView
 from django.http import HttpResponseRedirect
-from accountancy.utility.export_module import export_file
+from accountancy.utility.export import export_file
 from django.http import Http404, HttpResponseRedirect
 from django.shortcuts import redirect
 
